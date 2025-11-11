@@ -1,4 +1,6 @@
 # 1. Stock tracking
+# We're storing the data in json format for easy access and modification.
+import json
 class StockTracker:
     def __init__(self):
         self.stock = {}
@@ -65,7 +67,30 @@ class StockTracker:
             self.sales[name] += quantity_sold
         else:
             print("Item not found")
+    
+    # Saving to file
+    def save_to_file(self, filename="StockData.json"):
+        data = {
+            'stock': self.stock,
+            'sales': self.sales,
+            'targets': self.targets
+        }
+        with open(filename, 'w') as f:
+            json.dump(data, f, indent=4)
+
+    # Loading from file
+    def load_from_file(self, filename="StockData.json"):
+        try:
+            with open(filename, 'r') as f:
+                data = json.load(f)
+                self.stock = data.get('stock', {})
+                self.sales = data.get('sales', {})
+                self.targets = data.get('targets', {})
+        except FileNotFoundError:
+            print("No saved data found.")
 tracker = StockTracker()
+# Ensures the app loads existing data on startup
+tracker.load_from_file()
 
 while True:
     print("\n1. Add item\n2. Update Stock\n3. Get Stock\n4. Record Sale\n5. View Sales\n6. Set Target\n7. Check Progress\n8. Exit")
@@ -75,11 +100,13 @@ while True:
         name = input("Enter item name: ")
         quantity = int(input("Enter quantity: "))
         tracker.add_item(name, quantity)
+        tracker.save_to_file()
 
     elif choice == '2':
         name = input("Enter item name: ")
         quantity = int(input("Enter new stock quantity: "))
         tracker.update_stock(name, quantity)
+        tracker.save_to_file()
 
     elif choice == '3':
         print(tracker.get_stock())
@@ -88,6 +115,7 @@ while True:
         name = input("Enter item name: ")
         quantity_sold = int(input("Enter quantity sold: "))
         tracker.record_sale(name, quantity_sold)
+        tracker.save_to_file()
 
     elif choice == '5':
         name = input("Enter item name: ")
@@ -97,6 +125,7 @@ while True:
         name = input("Enter item name: ")
         target = int(input("Enter sales target: "))
         tracker.set_target(name, target)
+        tracker.save_to_file()
 
     elif choice == '7':
         name = input("Enter item name: ")
