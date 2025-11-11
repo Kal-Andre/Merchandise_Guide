@@ -68,7 +68,7 @@ class StockTracker:
         else:
             print("Item not found")
     
-    # Saving to file
+    # Stage 4. Saving to file
     def save_to_file(self, filename="StockData.json"):
         data = {
             'stock': self.stock,
@@ -88,12 +88,23 @@ class StockTracker:
                 self.targets = data.get('targets', {})
         except FileNotFoundError:
             print("No saved data found.")
+            
+    # Stage 5. Making a summary report that is tabular.
+    def summary_report(self):
+        print(f"{'item':<10} {'Stock':<10} {'Sold':<10} {'Target':<10} {'Progress':<10}")
+        print("-" * 50)
+        for name in self.stock:
+            stock = self.stock.get(name, 0)
+            sold = self.sales.get(name, 0)
+            target = self.targets.get(name, 0)
+            progress = (sold / target * 100) if target else 0
+            print(f"{name:<10} {stock:<10} {sold:<10} {progress:.2f}%")
 tracker = StockTracker()
 # Ensures the app loads existing data on startup
 tracker.load_from_file()
 
 while True:
-    print("\n1. Add item\n2. Update Stock\n3. Get Stock\n4. Record Sale\n5. View Sales\n6. Set Target\n7. Check Progress\n8. Exit")
+    print("\n1. Add item\n2. Update Stock\n3. Get Stock\n4. Record Sale\n5. View Sales\n6. Set Target\n7. Check Progress\n8. Summary Report\n9. Exit")
     choice = input("Choose an option: ")
 
     if choice == '1':
@@ -130,8 +141,11 @@ while True:
     elif choice == '7':
         name = input("Enter item name: ")
         tracker.check_progress(name)
-
+    
     elif choice == '8':
+        tracker.summary_report()
+        
+    elif choice == '9':
         break
 
     else:
