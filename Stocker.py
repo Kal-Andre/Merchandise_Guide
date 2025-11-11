@@ -42,7 +42,7 @@ class StockTracker:
     def get_sales(self, name):
         return self.sales.get(name, 0)
     
-    # Sets targets
+    # Stage 3: Target Tracker
 
     def set_target(self, name, target_quantity):
         self.targets[name] = target_quantity
