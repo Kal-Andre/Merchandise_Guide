@@ -91,14 +91,24 @@ class StockTracker:
             
     # Stage 5. Making a summary report that is tabular.
     def summary_report(self):
-        print(f"{'item':<10} {'Stock':<10} {'Sold':<10} {'Target':<10} {'Progress':<10}")
-        print("-" * 50)
+        headers = ["Item", "Stock", "Sold", "Target", "Progress"]
+        col_widths = [20, 10, 10, 10, 10]
+    
+        # Print header
+        for header, width in zip(headers, col_widths):
+            print(header.ljust(width), end="")
+        print()
+        print("-" * sum(col_widths))
+    
+        # Print rows
         for name in self.stock:
-            stock = self.stock.get(name, 0)
-            sold = self.sales.get(name, 0)
-            target = self.targets.get(name, 0)
-            progress = (sold / target * 100) if target else 0
-            print(f"{name:<10} {stock:<10} {sold:<10} {progress:.2f}%")
+            stock = str(self.stock.get(name, 0)).ljust(col_widths[1])
+            sold = str(self.sales.get(name, 0)).ljust(col_widths[2])
+            target = str(self.targets.get(name, 0)).ljust(col_widths[3])
+            progress = f"{(self.sales.get(name, 0) / self.targets.get(name, 1) * 100):.2f}%" if self.targets.get(name, 0) else "0.00%"
+            progress = progress.ljust(col_widths[4])
+    
+            print(name.ljust(col_widths[0]), stock, sold, target, progress)
 tracker = StockTracker()
 # Ensures the app loads existing data on startup
 tracker.load_from_file()
