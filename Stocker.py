@@ -1,24 +1,31 @@
 # 1. Stock tracking
 # We're storing the data in json format for easy access and modification.
 import json
+# We're logging data to its added dates.
+import datetime
 class StockTracker:
     def __init__(self):
         self.stock = {}
         self.sales = {}
         self.targets = {}
+        self.daily_log =[] # Temporary log for today's activities
 
     # StockTracker manages stock & initialises an empty dictionary to store items
 
     def add_item(self, name, quantity):
         self.stock[name] = quantity
         self.sales[name] = 0
+        self.daily_log.append(f"Added {quantity} units of {name}")
     # Add new items to the dictionary
     
     def update_stock(self, name, quantity):
         if name in self.stock:
+            old_quantity = self.stock[name]
             self.stock[name] = quantity
+            self.daily_log.append(f"Updated stock for {name}: {old_quantity} → {quantity}")
         else:
             print("Item not found")
+
 
     # Method to update existing stock quantities
     
@@ -38,7 +45,7 @@ class StockTracker:
             return
         self.stock[name] -= quantity_sold
         self.sales[name] += quantity_sold
-
+        self.daily_log.append(f"Sold {quantity_sold} units of {name}")
 
     # Another dictionary to store sales history
     def get_sales(self, name):
@@ -46,9 +53,12 @@ class StockTracker:
     
     # Stage 3: Target Tracker
 
-    def set_target(self, name, target_quantity):
-        self.targets[name] = target_quantity
+def set_target(self, name, target_quantity):
+    old_target = self.targets.get(name, 0)
+    self.targets[name] = target_quantity
+    self.daily_log.append(f"Set target for {name}: {old_target} → {target_quantity}")
 
+    
     def check_progress(self, name):
         sold = self.sales.get(name, 0)
         target = self.targets.get(name, 0)
@@ -109,6 +119,33 @@ class StockTracker:
             progress = progress.ljust(col_widths[4])
     
             print(name.ljust(col_widths[0]), stock, sold, target, progress)
+    
+    # Stage 6. Logging daily activities with dates
+    def finalize_daily_log(self):
+        today = datetime.today().date()
+        dated_log = [f"{entry} on {today}" for entry in self.daily_log]
+        self.history = self.history if hasattr(self, 'history') else []
+        self.history.extend(dated_log)
+        self.daily_log = []  # Clear for next day
+
+    # Stage 7. Exporting to CSV
+    def export_to_csv(self, filename="stock_report.csv"):
+        with open(filename, "w", newline="") as csvfile:
+            writer = csv.writer(csvfile)
+            writer.writerow(["Item", "Stock", "Sold", "Target", "Progress"])
+            for name in self.stock:
+                stock = self.stock[name]
+                sold = self.sales.get(name, 0)
+                target = self.targets.get(name, 0)
+                progress = (sold / target * 100) if target else 0
+                writer.writerow([name, stock, sold, target, f"{progress:.2f}%"])
+
+        # Export history separately
+        with open("change_log.csv", "w", newline="") as log_file:
+            log_writer = csv.writer(log_file)
+            log_writer.writerow(["Change Log"])
+            for entry in getattr(self, 'history', []):
+                log_writer.writerow([entry])
 tracker = StockTracker()
 # Ensures the app loads existing data on startup
 tracker.load_from_file()
