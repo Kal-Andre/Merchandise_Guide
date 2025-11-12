@@ -3,6 +3,8 @@
 import json
 # We're logging data to its added dates.
 import datetime
+# Exporting to CSV
+import csv
 class StockTracker:
     def __init__(self):
         self.stock = {}
@@ -146,7 +148,27 @@ def set_target(self, name, target_quantity):
             log_writer.writerow(["Change Log"])
             for entry in getattr(self, 'history', []):
                 log_writer.writerow([entry])
+    
+    # Stage 8. Enable removing items
+    def remove_item(self, name):
+        if name in self.stock:
+            del self.stock[name]
+            del self.sales[name]
+            if name in self.targets:
+                del self.targets[name]
+            self.daily_log.append(f"Removed item {name} from tracker")
+        else:
+            print("Item not found")
+
+    # Stage 9. Finalize daily log at the end of the day
+    def finalize_daily_log(self):
+        today = datetime.today().date()
+        dated_log = [f"{entry} on {today}" for entry in self.daily_log]
+        self.history = self.history if hasattr(self, 'history') else []
+        self.history.extend(dated_log)
+        self.daily_log = []
 tracker = StockTracker()
+        
 # Ensures the app loads existing data on startup
 tracker.load_from_file()
 
