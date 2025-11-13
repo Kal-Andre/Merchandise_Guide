@@ -6,7 +6,7 @@ tracker.load_from_file()
 
 while True:
     while True:
-        print("\n1. Add item\n2. Update Stock\n3. Get Stock\n4. Record Sale\n5. View Sales\n6. Set Target\n7. Check Progress\n8. Summary Report\n9. Exit")
+        print("\n1. Add item\n2. Update Stock\n3. Get Stock\n4. Record Sale\n5. View Sales\n6. Set Target\n7. Check Progress\n8. Summary Report\n9. Export to CSV\n10. Exit")
         choice = input("Choose an option: ")
 
         if choice == '1':
@@ -48,6 +48,8 @@ while True:
             tracker.summary_report()
 
         elif choice == '9':
+            tracker.export_to_csv()
+        elif choice == '10':
             break
 
         else:
