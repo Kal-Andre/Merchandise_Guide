@@ -63,7 +63,7 @@ def record_sale():
     outlet = outlet_var.get()
     name = sale_name_var.get()
     quantity = int(sale_quantity_entry.get())
-    tracker.record_sale(name, quantity)
+    tracker.record_sale(outlet, name, quantity)
     tracker.save_to_file()
     status_label.config(text=f"📦 Recorded sale of {quantity} units of {name}")
 tk.Button(sale_frame, text="Record Sale", command=record_sale).grid(row=2, column=0, columnspan=2)

@@ -51,7 +51,7 @@ class StockTracker:
         if self.stock[name] < quantity_sold:
             print("NOT ENOUGH STOCK.")
             return
-        self.sales[outlet][item] = self.sales[outlet].get(name, 0) + quantity_sold
+        self.sales[outlet][name] = self.sales[outlet].get(name, 0) + quantity_sold
         self.stock[name] -= quantity_sold
         self.sales[name] += quantity_sold
         self.daily_log.append(f"Sold {quantity_sold} units of {name}")
