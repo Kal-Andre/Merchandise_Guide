@@ -11,7 +11,11 @@ class StockTracker:
         self.sales = {}
         self.targets = {}
         self.daily_log =[] # Temporary log for today's activities
-
+        self.sales = {
+            "BestBuy Bukoto": {},
+            "Kenjoy Bukoto": {},
+            "Carrefour Acacia": {}
+        }
     # StockTracker manages stock & initialises an empty dictionary to store items
 
     def add_item(self, name, quantity):
@@ -38,13 +42,16 @@ class StockTracker:
 
     # Stage 2. Sales Tracker
 
-    def record_sale(self, name, quantity_sold):
+    def record_sale(self, outlet, name, quantity_sold):
+        if outlet not in self.sales:
+            self.sales[outlet] = {}
         if name not in self.stock:
             print("ITEM NOT FOUND")
             return
         if self.stock[name] < quantity_sold:
             print("NOT ENOUGH STOCK.")
             return
+        self.sales[outlet][item] = self.sales[outlet].get(name, 0) + quantity_sold
         self.stock[name] -= quantity_sold
         self.sales[name] += quantity_sold
         self.daily_log.append(f"Sold {quantity_sold} units of {name}")

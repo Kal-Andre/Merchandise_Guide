@@ -10,6 +10,13 @@ tracker.load_from_file()
 root = tk.Tk()
 root.title("Soft Drink Stock Tracker")
 
+# ========== Outlet Selection ==========
+outlet_var = tk.StringVar()
+outlet_dropdown = ttk.Combobox(root, textvariable=outlet_var)
+outlet_dropdown['values'] = ["BestBuy Bukoto", "Kenjoy Bukoto", "Carrefour Acacia"]
+outlet_dropdown.grid(row=0, column=1, padx=10, pady=10)
+outlet_var.set("BestBuy Bukoto")  # default
+
 # ========== Add Item Section ==========
 add_frame = tk.LabelFrame(root, text="Add Item", padx=10, pady=10)
 add_frame.grid(row=0, column=0, padx=10, pady=10)
@@ -53,12 +60,13 @@ sale_name_dropdown = ttk.Combobox(sale_frame, textvariable=sale_name_var)
 sale_name_dropdown.grid(row=0, column=1)
 
 def record_sale():
+    outlet = outlet_var.get()
     name = sale_name_var.get()
     quantity = int(sale_quantity_entry.get())
     tracker.record_sale(name, quantity)
     tracker.save_to_file()
     status_label.config(text=f"📦 Recorded sale of {quantity} units of {name}")
-    tk.Button(sale_frame, text="Record Sale", command=record_sale).grid(row=2, column=0, columnspan=2)
+tk.Button(sale_frame, text="Record Sale", command=record_sale).grid(row=2, column=0, columnspan=2)
 # ========== Summary Section ==========
 summary_frame = tk.LabelFrame(root, text="Summary", padx=10, pady=10)
 summary_frame.grid(row=3, column=0, padx=10, pady=10)
