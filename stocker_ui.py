@@ -71,20 +71,39 @@ tk.Button(sale_frame, text="Record Sale", command=record_sale).grid(row=2, colum
 summary_frame = tk.LabelFrame(root, text="Summary", padx=10, pady=10)
 summary_frame.grid(row=3, column=0, padx=10, pady=10)
 
+# Outlet selection for summary
+summary_outlet_var = tk.StringVar()
+summary_outlet_dropdown = ttk.Combobox(summary_frame, textvariable=summary_outlet_var)
+summary_outlet_dropdown['values'] = ["All Outlets", "BestBuy Bukoto", "Kenjoy Bukoto", "Carrefour Acacia"]
+summary_outlet_dropdown.grid(row=0, column=1, padx=5)
+summary_outlet_var.set("All Outlets")
+
 def show_summary():
+    selected_outlet = summary_outlet_var.get()
     summary_window = tk.Toplevel(root)
-    summary_window.title("Summary Report")
+    summary_window.title(f"Summary Report - {selected_outlet}")
     text = tk.Text(summary_window, width=80, height=20)
     text.pack()
     headers = f"{'Item':<20}{'Stock':<10}{'Sold':<10}{'Target':<10}{'Progress':<10}\n"
     text.insert(tk.END, headers + "-"*60 + "\n")
-    for name in tracker.stock:
-        stock = tracker.stock[name]
-        sold = tracker.sales.get(name, 0)
-        target = tracker.targets.get(name, 0)
-        progress = (sold / target * 100) if target else 0
-        line = f"{name:<20}{stock:<10}{sold:<10}{target:<10}{progress:.2f}%\n"
-        text.insert(tk.END, line)
+
+    if selected_outlet == "All Outlets":
+        for name in tracker.stock:
+            total_sold = sum(tracker.sales[outlet].get(name, 0) for outlet in tracker.sales)
+            stock = tracker.stock[name]
+            target = tracker.targets.get(name, 0)
+            progress = (total_sold / target * 100) if target else 0
+            line = f"{name:<20}{stock:<10}{total_sold:<10}{target:<10}{progress:.2f}%\n"
+            text.insert(tk.END, line)
+    else:
+        outlet_sales = tracker.sales.get(selected_outlet, {})
+        for name in tracker.stock:
+            sold = outlet_sales.get(name, 0)
+            stock = tracker.stock[name]
+            target = tracker.targets.get(name, 0)
+            progress = (sold / target * 100) if target else 0
+            line = f"{name:<20}{stock:<10}{sold:<10}{target:<10}{progress:.2f}%\n"
+            text.insert(tk.END, line)
 
 tk.Button(summary_frame, text="Show Summary", command=show_summary).grid(row=0, column=0, sticky="w")
 
@@ -124,7 +143,31 @@ def export_csv():
     tracker.export_to_csv()
     status_label.config(text="📁 Exported data to CSV")
 
+def open_daily_entry_sheet():
+    outlet = outlet_var.get()
+    entry_window = tk.Toplevel(root)
+    entry_window.title(f"Daily Entry - {outlet}")
 
+    entries = {}
+    row = 0
+    for item in tracker.stock:
+        tk.Label(entry_window, text=item).grid(row=row, column=0)
+        qty_entry = tk.Entry(entry_window, width=10)
+        qty_entry.grid(row=row, column=1)
+        entries[item] = qty_entry
+        row += 1
+
+    def submit_sales():
+        for item, entry in entries.items():
+            val = entry.get()
+            if val.strip().isdigit():
+                tracker.record_sale(outlet, item, int(val))
+        tracker.save_to_file()
+        status_label.config(text=f"✅ Recorded daily sales for {outlet}")
+        entry_window.destroy()
+
+    tk.Button(entry_window, text="Submit", command=submit_sales).grid(row=row, column=0, columnspan=2)
+tk.Button(sale_frame, text="📋 Daily Entry Sheet", command=open_daily_entry_sheet).grid(row=3, column=0, columnspan=2)
 tk.Button(summary_frame, text="📘 Finalize Day", command=finalize_day).grid(row=1, column=0, sticky="w")
 tk.Button(summary_frame, text="Export to CSV", command=export_csv).grid(row=2, column=0, sticky="w")
 tracker.load_from_file()
