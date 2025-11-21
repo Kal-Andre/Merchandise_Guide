@@ -108,6 +108,10 @@ summary_outlet_dropdown['values'] = ["All Outlets", "BestBuy Bukoto", "Kenjoy Bu
 summary_outlet_dropdown.grid(row=0, column=1, padx=5)
 summary_outlet_var.set("All Outlets")
 
+# Export options
+tk.Button(summary_frame, text="📁 Export Outlet Summary", command=tracker.export_to_csv).grid(row=3, column=0, sticky="w", pady=5)
+tk.Button(summary_frame, text="📊 Export Monthly Roll-Up", command=tracker.export_monthly_summary).grid(row=4, column=0, sticky="w", pady=5)
+
 def show_summary():
     selected_outlet = summary_outlet_var.get()
     summary_window = tk.Toplevel(root)
@@ -148,7 +152,17 @@ tk.Button(summary_frame, text="Show Summary", command=show_summary).grid(row=0, 
 # ========== Status Label ==========
 status_label = tk.Label(root, text="", fg="green")
 status_label.grid(row=4, column=0, pady=10)
+# Wrap the calls so the status label updates when you click
+def export_outlet_summary():
+    tracker.export_to_csv()
+    status_label.config(text="📁 Exported outlet summary to CSV")
 
+def export_monthly_rollup():
+    tracker.export_monthly_summary()
+    status_label.config(text="📊 Exported monthly roll-up to CSV")
+
+tk.Button(summary_frame, text="📁 Export Outlet Summary", command=export_outlet_summary).grid(row=3, column=0, sticky="w", pady=5)
+tk.Button(summary_frame, text="📊 Export Monthly Roll-Up", command=export_monthly_rollup).grid(row=4, column=0, sticky="w", pady=5)
 # ========== Set Target Section ==========
 target_frame = tk.LabelFrame(root, text="Set Target", padx=10, pady=10)
 target_frame.grid(row=2, column=0, padx=10, pady=10)

@@ -162,22 +162,22 @@ class StockTracker:
                 "Outlet", "Item", "Weekly Sold", "Daily Estimate",
                 "Cumulative Sold", "Target", "Progress"
             ])
-    
+
             for outlet in self.sales:
                 for item in self.stock:
                     # Weekly sold (from weekly_sales dict)
                     weekly_sold = self.weekly_sales.get(outlet, {}).get(item, 0)
-    
+
                     # Daily estimate = weekly ÷ 7
                     daily_est = weekly_sold / 7 if weekly_sold else 0
-    
+
                     # Cumulative sold (from sales dict)
                     cumulative_sold = self.sales[outlet].get(item, 0)
-    
+
                     # Target and progress
                     target = self.targets.get(item, 0)
                     progress = (cumulative_sold / target * 100) if target else 0
-    
+
                     writer.writerow([
                         outlet, item, weekly_sold, f"{daily_est:.2f}",
                         cumulative_sold, target, f"{progress:.2f}%"
@@ -201,6 +201,39 @@ class StockTracker:
         self.history = self.history if hasattr(self, 'history') else []
         self.history.extend(dated_log)
         self.daily_log = []
+
+    def export_monthly_summary(self, filename="monthly_summary.csv"):
+        with open(filename, "w", newline="") as f:
+            writer = csv.writer(f)
+            writer.writerow([
+                "Item", "Total Weekly Sold", "Daily Estimate",
+                "Cumulative Sold", "Target", "Progress"
+            ])
+    
+            for item in self.stock:
+                # Aggregate weekly sold across all outlets
+                total_weekly_sold = sum(
+                    self.weekly_sales.get(outlet, {}).get(item, 0)
+                    for outlet in self.weekly_sales
+                )
+    
+                # Daily estimate = weekly ÷ 7
+                daily_est = total_weekly_sold / 7 if total_weekly_sold else 0
+    
+                # Aggregate cumulative sold across all outlets
+                cumulative_sold = sum(
+                    self.sales.get(outlet, {}).get(item, 0)
+                    for outlet in self.sales
+                )
+
+            # Target and progress
+            target = self.targets.get(item, 0)
+            progress = (cumulative_sold / target * 100) if target else 0
+
+            writer.writerow([
+                item, total_weekly_sold, f"{daily_est:.2f}",
+                cumulative_sold, target, f"{progress:.2f}%"
+            ])
 tracker = StockTracker()
         
 # Ensures the app loads existing data on startup
