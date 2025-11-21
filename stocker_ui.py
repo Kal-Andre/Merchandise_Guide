@@ -184,12 +184,7 @@ def set_target():
     status_label.config(text=f"🎯 Set target of {quantity} for {name}")
 
 tk.Button(target_frame, text="Set Target", command=set_target).grid(row=2, column=0, columnspan=2)
-
-def finalize_day():
-    tracker.finalize_daily_log()
-    tracker.save_to_file()
-    status_label.config(text="📘 Finalized today's log")
-
+# ========== Export ==========
 
 def export_csv():
     tracker.export_to_csv()
@@ -220,7 +215,6 @@ def open_daily_entry_sheet():
 
     tk.Button(entry_window, text="Submit", command=submit_sales).grid(row=row, column=0, columnspan=2)
 tk.Button(sale_frame, text="📋 Daily Entry Sheet", command=open_daily_entry_sheet).grid(row=3, column=0, columnspan=2)
-tk.Button(summary_frame, text="📘 Finalize Day", command=finalize_day).grid(row=1, column=0, sticky="w")
 tk.Button(summary_frame, text="Export to CSV", command=export_csv).grid(row=2, column=0, sticky="w")
 tracker.load_from_file()
 refresh_dropdowns()

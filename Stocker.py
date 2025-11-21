@@ -194,13 +194,7 @@ class StockTracker:
         else:
             print("Item not found")
 
-    # Stage 9. Finalize daily log at the end of the day
-    def finalize_daily_log(self):
-        today = datetime.today().date()
-        dated_log = [f"{entry} on {today}" for entry in self.daily_log]
-        self.history = self.history if hasattr(self, 'history') else []
-        self.history.extend(dated_log)
-        self.daily_log = []
+    # Stage 9. Export monthly roll-up
 
     def export_monthly_summary(self, filename="monthly_summary.csv"):
         with open(filename, "w", newline="") as f:
@@ -209,17 +203,17 @@ class StockTracker:
                 "Item", "Total Weekly Sold", "Daily Estimate",
                 "Cumulative Sold", "Target", "Progress"
             ])
-    
+
             for item in self.stock:
                 # Aggregate weekly sold across all outlets
                 total_weekly_sold = sum(
                     self.weekly_sales.get(outlet, {}).get(item, 0)
                     for outlet in self.weekly_sales
                 )
-    
+
                 # Daily estimate = weekly ÷ 7
                 daily_est = total_weekly_sold / 7 if total_weekly_sold else 0
-    
+
                 # Aggregate cumulative sold across all outlets
                 cumulative_sold = sum(
                     self.sales.get(outlet, {}).get(item, 0)
