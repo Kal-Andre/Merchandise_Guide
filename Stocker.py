@@ -156,22 +156,32 @@ class StockTracker:
 
     # Stage 7. Exporting to CSV
     def export_to_csv(self, filename="stock_report.csv"):
-        with open(filename, "w", newline="") as csvfile:
-            writer = csv.writer(csvfile)
-            writer.writerow(["Item", "Stock", "Sold", "Target", "Progress"])
-            for name in self.stock:
-                stock = self.stock[name]
-                sold = self.sales.get(name, 0)
-                target = self.targets.get(name, 0)
-                progress = (sold / target * 100) if target else 0
-                writer.writerow([name, stock, sold, target, f"{progress:.2f}%"])
-
-        # Export history separately
-        with open("change_log.csv", "w", newline="") as log_file:
-            log_writer = csv.writer(log_file)
-            log_writer.writerow(["Change Log"])
-            for entry in getattr(self, 'history', []):
-                log_writer.writerow([entry])
+        with open(filename, "w", newline="") as f:
+            writer = csv.writer(f)
+            writer.writerow([
+                "Outlet", "Item", "Weekly Sold", "Daily Estimate",
+                "Cumulative Sold", "Target", "Progress"
+            ])
+    
+            for outlet in self.sales:
+                for item in self.stock:
+                    # Weekly sold (from weekly_sales dict)
+                    weekly_sold = self.weekly_sales.get(outlet, {}).get(item, 0)
+    
+                    # Daily estimate = weekly ÷ 7
+                    daily_est = weekly_sold / 7 if weekly_sold else 0
+    
+                    # Cumulative sold (from sales dict)
+                    cumulative_sold = self.sales[outlet].get(item, 0)
+    
+                    # Target and progress
+                    target = self.targets.get(item, 0)
+                    progress = (cumulative_sold / target * 100) if target else 0
+    
+                    writer.writerow([
+                        outlet, item, weekly_sold, f"{daily_est:.2f}",
+                        cumulative_sold, target, f"{progress:.2f}%"
+                    ])
     
     # Stage 8. Enable removing items
     def remove_item(self, name):
