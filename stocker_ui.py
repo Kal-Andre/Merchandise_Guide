@@ -112,27 +112,35 @@ def show_summary():
     selected_outlet = summary_outlet_var.get()
     summary_window = tk.Toplevel(root)
     summary_window.title(f"Summary Report - {selected_outlet}")
-    text = tk.Text(summary_window, width=80, height=20)
+    text = tk.Text(summary_window, width=100, height=25)
     text.pack()
-    headers = f"{'Item':<20}{'Stock':<10}{'Sold':<10}{'Target':<10}{'Progress':<10}\n"
-    text.insert(tk.END, headers + "-"*60 + "\n")
+
+    headers = f"{'Item':<20}{'Weekly Sold':<15}{'Daily Est.':<15}{'Cumulative Sold':<15}{'Target':<10}{'Progress':<10}\n"
+    text.insert(tk.END, headers + "-"*80 + "\n")
 
     if selected_outlet == "All Outlets":
-        for name in tracker.stock:
-            total_sold = sum(tracker.sales[outlet].get(name, 0) for outlet in tracker.sales)
-            stock = tracker.stock[name]
-            target = tracker.targets.get(name, 0)
-            progress = (total_sold / target * 100) if target else 0
-            line = f"{name:<20}{stock:<10}{total_sold:<10}{target:<10}{progress:.2f}%\n"
+        for item in tracker.stock:
+            # Weekly sold = sum of last week's differences across outlets
+            weekly_sold = sum(
+                tracker.sales[outlet].get(item, 0) - tracker.sales[outlet].get(item, 0) + tracker.sales[outlet].get(item, 0)
+                for outlet in tracker.sales
+            )
+            # Actually, we need to store weekly_sold separately in StockTracker for clarity
+            cumulative_sold = sum(tracker.sales[outlet].get(item, 0) for outlet in tracker.sales)
+            daily_est = weekly_sold / 7 if weekly_sold else 0
+            target = tracker.targets.get(item, 0)
+            progress = (cumulative_sold / target * 100) if target else 0
+            line = f"{item:<20}{weekly_sold:<15}{daily_est:<15.2f}{cumulative_sold:<15}{target:<10}{progress:.2f}%\n"
             text.insert(tk.END, line)
     else:
         outlet_sales = tracker.sales.get(selected_outlet, {})
-        for name in tracker.stock:
-            sold = outlet_sales.get(name, 0)
-            stock = tracker.stock[name]
-            target = tracker.targets.get(name, 0)
-            progress = (sold / target * 100) if target else 0
-            line = f"{name:<20}{stock:<10}{sold:<10}{target:<10}{progress:.2f}%\n"
+        for item in tracker.stock:
+            weekly_sold = outlet_sales.get(item, 0)  # last week's difference
+            cumulative_sold = outlet_sales.get(item, 0)
+            daily_est = weekly_sold / 7 if weekly_sold else 0
+            target = tracker.targets.get(item, 0)
+            progress = (cumulative_sold / target * 100) if target else 0
+            line = f"{item:<20}{weekly_sold:<15}{daily_est:<15.2f}{cumulative_sold:<15}{target:<10}{progress:.2f}%\n"
             text.insert(tk.END, line)
 
 tk.Button(summary_frame, text="Show Summary", command=show_summary).grid(row=0, column=0, sticky="w")

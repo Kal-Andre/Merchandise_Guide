@@ -16,6 +16,7 @@ class StockTracker:
             "Kenjoy Bukoto": {},
             "Carrefour Acacia": {}
         }
+        self.weekly_sales = {} # Track last week's sold units per outlet
     # StockTracker manages stock & initialises an empty dictionary to store items
 
     def add_item(self, name, quantity):
@@ -56,13 +57,22 @@ class StockTracker:
         self.sales[name] += quantity_sold
         self.daily_log.append(f"Sold {quantity_sold} units of {name}")'''
 
-     # We shall use record weekly stock balances other than daily sales. 
+    # We shall use record weekly stock balances other than daily sales. 
     def record_weekly_balance(self, outlet, item, balance):
+        if outlet not in self.weekly_balances:
+            self.weekly_balances[outlet] = {}
+        if outlet not in self.sales:
+            self.sales[outlet] = {}
+        if outlet not in self.weekly_sales:
+            self.weekly_sales[outlet] = {}
+
         prev_balance = self.weekly_balances[outlet].get(item, balance)
         sold = prev_balance - balance
         self.weekly_balances[outlet][item] = balance
         self.sales[outlet][item] = self.sales[outlet].get(item, 0) + sold
+        self.weekly_sales[outlet][item] = sold # Store weekly sold separately
 
+        self.stock[item] = balance
     # Another dictionary to store sales history
     def get_sales(self, name):
         return self.sales.get(name, 0)
