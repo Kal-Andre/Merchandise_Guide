@@ -29,6 +29,9 @@ tk.Label(add_frame, text="Stock Quantity").grid(row=1, column=0)
 stock_entry = tk.Entry(add_frame)
 stock_entry.grid(row=1, column=1)
 
+item_frame = tk.LabelFrame(root, text="Item Management", padx=10, pady=10)
+item_frame.grid(row=1, column=0, padx=10, pady=10, sticky="w")
+
 def add_item():
     name = item_name_entry.get()
     quantity = int(stock_entry.get())
@@ -38,13 +41,27 @@ def add_item():
 
 tk.Button(add_frame, text="Add Item", command=add_item).grid(row=2, column=0, columnspan=2)
 
+
+def remove_item_ui():
+    item_name = remove_item_var.get().strip()  # get from entry field
+    if item_name:
+        tracker.remove_item(item_name)
+        tracker.save_to_file()
+        status_label.config(text=f"🗑️ Removed {item_name} from tracker")
+    else:
+        status_label.config(text="⚠️ Please enter an item name to remove")
+
+remove_item_var = tk.StringVar()
+tk.Entry(item_frame, textvariable=remove_item_var).grid(row=2, column=0, padx=5, pady=5)
+tk.Button(item_frame, text="Remove Item", command=remove_item_ui).grid(row=2, column=1, padx=5, pady=5)
+
 def refresh_dropdowns():
     items = list(tracker.stock.keys())
-    sale_name_dropdown['values'] = items
+    #sale_name_dropdown['values'] = items
     target_name_dropdown['values'] = items
 
 # ========== Record Sale Section ==========
-sale_frame = tk.LabelFrame(root, text="Record Sale", padx=10, pady=10)
+'''sale_frame = tk.LabelFrame(root, text="Record Sale", padx=10, pady=10)
 sale_frame.grid(row=1, column=0, padx=10, pady=10)
 
 tk.Label(sale_frame, text="Item Name").grid(row=0, column=0)
@@ -57,7 +74,7 @@ sale_quantity_entry.grid(row=1, column=1)
 
 sale_name_var = tk.StringVar()
 sale_name_dropdown = ttk.Combobox(sale_frame, textvariable=sale_name_var)
-sale_name_dropdown.grid(row=0, column=1)
+sale_name_dropdown.grid(row=0, column=1)'''
 
 # Record sale function replaced.
 '''def record_sale():
@@ -152,6 +169,7 @@ tk.Button(summary_frame, text="Show Summary", command=show_summary).grid(row=0, 
 # ========== Status Label ==========
 status_label = tk.Label(root, text="", fg="green")
 status_label.grid(row=4, column=0, pady=10)
+
 # Wrap the calls so the status label updates when you click
 def export_outlet_summary():
     tracker.export_to_csv()

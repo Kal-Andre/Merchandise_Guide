@@ -185,14 +185,28 @@ class StockTracker:
     
     # Stage 8. Enable removing items
     def remove_item(self, name):
+        # Remove from stock
         if name in self.stock:
             del self.stock[name]
-            del self.sales[name]
-            if name in self.targets:
-                del self.targets[name]
-            self.daily_log.append(f"Removed item {name} from tracker")
-        else:
-            print("Item not found")
+
+        # Remove from targets
+        if name in self.targets:
+            del self.targets[name]
+
+        # Remove from sales per outlet
+        for outlet in self.sales:
+            if name in self.sales[outlet]:
+                del self.sales[outlet][name]
+
+        # Remove from weekly balances per outlet
+        for outlet in self.weekly_balances:
+            if name in self.weekly_balances[outlet]:
+                del self.weekly_balances[outlet][name]
+
+        # Remove from weekly sales per outlet
+        for outlet in self.weekly_sales:
+            if name in self.weekly_sales[outlet]:
+                del self.weekly_sales[outlet][name]
 
     # Stage 9. Export monthly roll-up
 
