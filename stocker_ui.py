@@ -59,14 +59,44 @@ sale_name_var = tk.StringVar()
 sale_name_dropdown = ttk.Combobox(sale_frame, textvariable=sale_name_var)
 sale_name_dropdown.grid(row=0, column=1)
 
-def record_sale():
+# Record sale function replaced.
+'''def record_sale():
     outlet = outlet_var.get()
     name = sale_name_var.get()
     quantity = int(sale_quantity_entry.get())
     tracker.record_sale(outlet, name, quantity)
     tracker.save_to_file()
     status_label.config(text=f"📦 Recorded sale of {quantity} units of {name}")
-tk.Button(sale_frame, text="Record Sale", command=record_sale).grid(row=2, column=0, columnspan=2)
+tk.Button(sale_frame, text="Record Sale", command=record_sale).grid(row=2, column=0, columnspan=2)'''
+
+def open_weekly_balance_entry():
+    outlet = outlet_var.get()  # selected outlet from dropdown
+    entry_window = tk.Toplevel(root)
+    entry_window.title(f"Weekly Balance Entry - {outlet}")
+
+    entries = {}
+    row = 0
+    for item in tracker.stock:
+        tk.Label(entry_window, text=item).grid(row=row, column=0, padx=5, pady=2)
+        balance_entry = tk.Entry(entry_window, width=10)
+        balance_entry.grid(row=row, column=1, padx=5, pady=2)
+        entries[item] = balance_entry
+        row += 1
+
+    def submit_balances():
+        for item, entry in entries.items():
+            val = entry.get()
+            if val.strip().isdigit():
+                balance = int(val)
+                tracker.record_weekly_balance(outlet, item, balance)
+        tracker.save_to_file()
+        status_label.config(text=f"✅ Recorded weekly balances for {outlet}")
+        entry_window.destroy()
+
+    tk.Button(entry_window, text="Submit", command=submit_balances).grid(row=row, column=0, columnspan=2, pady=10)
+
+tk.Button(sale_frame, text="📊 Weekly Balance Entry", command=open_weekly_balance_entry).grid(row=4, column=0, columnspan=2, pady=5)
+
 # ========== Summary Section ==========
 summary_frame = tk.LabelFrame(root, text="Summary", padx=10, pady=10)
 summary_frame.grid(row=3, column=0, padx=10, pady=10)

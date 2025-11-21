@@ -42,7 +42,7 @@ class StockTracker:
 
     # Stage 2. Sales Tracker
 
-    def record_sale(self, outlet, name, quantity_sold):
+    '''def record_sale(self, outlet, name, quantity_sold):
         if outlet not in self.sales:
             self.sales[outlet] = {}
         if name not in self.stock:
@@ -54,7 +54,14 @@ class StockTracker:
         self.sales[outlet][name] = self.sales[outlet].get(name, 0) + quantity_sold
         self.stock[name] -= quantity_sold
         self.sales[name] += quantity_sold
-        self.daily_log.append(f"Sold {quantity_sold} units of {name}")
+        self.daily_log.append(f"Sold {quantity_sold} units of {name}")'''
+
+     # We shall use record weekly stock balances other than daily sales. 
+    def record_weekly_balance(self, outlet, item, balance):
+        prev_balance = self.weekly_balances[outlet].get(item, balance)
+        sold = prev_balance - balance
+        self.weekly_balances[outlet][item] = balance
+        self.sales[outlet][item] = self.sales[outlet].get(item, 0) + sold
 
     # Another dictionary to store sales history
     def get_sales(self, name):
