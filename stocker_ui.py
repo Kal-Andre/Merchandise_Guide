@@ -48,16 +48,28 @@ tk.Button(item_frame, text="Remove Item", command=lambda: remove_item_ui()).grid
 
 def remove_item_ui():
     name = remove_item_var.get().strip()
-    if name:
+    if not name:
+        status_label.config(text="⚠️ Please select an item to remove")
+        return
+
+    confirm_window = tk.Toplevel(root)
+    confirm_window.title("Confirm Removal")
+
+    tk.Label(confirm_window, text=f"Are you sure you want to remove '{name}'?").pack(padx=20, pady=10)
+
+    def confirm():
         tracker.remove_item(name)
         tracker.save_to_file()
         status_label.config(text=f"🗑️ Removed {name} from tracker")
-        refresh_dropdowns()
         remove_item_var.set("")
-    else:
-        status_label.config(text="⚠️ Please enter an item name to remove")
-    # Clear field
-    remove_item_var.set("")
+        refresh_dropdowns()
+        confirm_window.destroy()
+
+    def cancel():
+        confirm_window.destroy()
+
+    tk.Button(confirm_window, text="Yes, Remove", command=confirm).pack(side="left", padx=10, pady=10)
+    tk.Button(confirm_window, text="Cancel", command=cancel).pack(side="right", padx=10, pady=10)
 # ========== Set Target ==========
 target_frame = tk.LabelFrame(root, text="Set Target", padx=20, pady=10)
 target_frame.grid(row=1, column=1, padx=10, pady=10, sticky="w")

@@ -186,28 +186,24 @@ class StockTracker:
     # Stage 8. Enable removing items
     def remove_item(self, name):
         # Remove from stock
-        if name in self.stock:
+        if isinstance(self.stock, dict) and name in self.stock:
             del self.stock[name]
-
+    
         # Remove from targets
-        if name in self.targets:
+        if isinstance(self.targets, dict) and name in self.targets:
             del self.targets[name]
-
-        # Remove from sales per outlet
-        for outlet in self.sales:
-            if name in self.sales[outlet]:
-                del self.sales[outlet][name]
-
-        # Remove from weekly balances per outlet
-        for outlet in self.weekly_balances:
-            if name in self.weekly_balances[outlet]:
-                del self.weekly_balances[outlet][name]
-
-        # Remove from weekly sales per outlet
-        for outlet in self.weekly_sales:
-            if name in self.weekly_sales[outlet]:
-                del self.weekly_sales[outlet][name]
-
+    
+        # Remove from sales
+        if isinstance(self.sales, dict):
+            for outlet, outlet_sales in self.sales.items():
+                if isinstance(outlet_sales, dict):
+                    outlet_sales.pop(name, None)
+    
+        # Remove from weekly sales
+        if isinstance(self.weekly_sales, dict):
+            for outlet, outlet_weekly in self.weekly_sales.items():
+                if isinstance(outlet_weekly, dict):
+                    outlet_weekly.pop(name, None)
     # Stage 9. Export monthly roll-up
 
     def export_monthly_summary(self, filename="monthly_summary.csv"):
