@@ -35,6 +35,9 @@ def add_item():
         tracker.save_to_file()
         status_label.config(text=f"✅ Added {qty} units of {name}")
         refresh_dropdowns()
+        # Clear fields
+        item_name_entry.delete(0, tk.END)
+        stock_entry.delete(0, tk.END)
 
 tk.Button(item_frame, text="Add Item", command=add_item).grid(row=0, column=2, padx=5)
 
@@ -51,7 +54,8 @@ def remove_item_ui():
         refresh_dropdowns()
     else:
         status_label.config(text="⚠️ Please enter an item name to remove")
-
+    # Clear field
+    remove_item_var.set("")
 # ========== Set Target ==========
 target_frame = tk.LabelFrame(root, text="Set Target", padx=20, pady=10)
 target_frame.grid(row=1, column=1, padx=10, pady=10, sticky="w")
@@ -70,6 +74,9 @@ def set_target():
         tracker.set_target(name, qty)
         tracker.save_to_file()
         status_label.config(text=f"🎯 Set target of {qty} for {name}")
+         # Clear fields
+        target_name_var.set("")
+        target_quantity_entry.delete(0, tk.END)
 
 tk.Button(target_frame, text="Set Target", command=set_target).grid(row=1, column=0, columnspan=2, pady=5)
 
