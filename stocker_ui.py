@@ -1,8 +1,8 @@
-from Stocker import StockTracker
 import tkinter as tk
 from tkinter import ttk
+from Stocker import StockTracker
 
-# Initialize tracker and load saved data
+# Initialize tracker
 tracker = StockTracker()
 tracker.load_from_file()
 
@@ -12,85 +12,124 @@ root.title("Soft Drink Stock Tracker")
 
 # ========== Outlet Selection ==========
 outlet_var = tk.StringVar()
-outlet_dropdown = ttk.Combobox(root, textvariable=outlet_var)
+tk.Label(root, text="Select Outlet").grid(row=0, column=0, padx=10, pady=10, sticky="w")
+outlet_dropdown = ttk.Combobox(root, textvariable=outlet_var, width=30)
 outlet_dropdown['values'] = ["BestBuy Bukoto", "Kenjoy Bukoto", "Carrefour Acacia"]
-outlet_dropdown.grid(row=0, column=1, padx=10, pady=10)
-outlet_var.set("BestBuy Bukoto")  # default
+outlet_dropdown.grid(row=0, column=1, padx=10, pady=10, sticky="w")
+outlet_var.set("BestBuy Bukoto")
 
-# ========== Add Item Section ==========
-add_frame = tk.LabelFrame(root, text="Add Item", padx=10, pady=10)
-add_frame.grid(row=0, column=0, padx=10, pady=10)
-
-tk.Label(add_frame, text="Item Name").grid(row=0, column=0)
-item_name_entry = tk.Entry(add_frame)
-item_name_entry.grid(row=0, column=1)
-
-tk.Label(add_frame, text="Stock Quantity").grid(row=1, column=0)
-stock_entry = tk.Entry(add_frame)
-stock_entry.grid(row=1, column=1)
-
-item_frame = tk.LabelFrame(root, text="Item Management", padx=10, pady=10)
+# ========== Item Management ==========
+item_frame = tk.LabelFrame(root, text="Item Management", padx=20, pady=10)
 item_frame.grid(row=1, column=0, padx=10, pady=10, sticky="w")
 
+item_name_entry = tk.Entry(item_frame, width=20)
+item_name_entry.grid(row=0, column=0, padx=5, pady=5)
+stock_entry = tk.Entry(item_frame, width=10)
+stock_entry.grid(row=0, column=1, padx=5, pady=5)
+
 def add_item():
-    name = item_name_entry.get()
-    quantity = int(stock_entry.get())
-    tracker.add_item(name, quantity)
-    tracker.save_to_file()
-    status_label.config(text=f"✅ Added {quantity} units of {name}")
+    name = item_name_entry.get().strip()
+    qty = int(stock_entry.get()) if stock_entry.get().isdigit() else 0
+    if name:
+        tracker.add_item(name, qty)
+        tracker.save_to_file()
+        status_label.config(text=f"✅ Added {qty} units of {name}")
+        refresh_dropdowns()
 
-tk.Button(add_frame, text="Add Item", command=add_item).grid(row=2, column=0, columnspan=2)
+tk.Button(item_frame, text="Add Item", command=add_item).grid(row=0, column=2, padx=5)
 
+remove_item_var = tk.StringVar()
+tk.Entry(item_frame, textvariable=remove_item_var, width=20).grid(row=1, column=0, padx=5, pady=5)
+tk.Button(item_frame, text="Remove Item", command=lambda: remove_item_ui()).grid(row=1, column=1, padx=5)
 
 def remove_item_ui():
-    item_name = remove_item_var.get().strip()  # get from entry field
-    if item_name:
-        tracker.remove_item(item_name)
+    name = remove_item_var.get().strip()
+    if name:
+        tracker.remove_item(name)
         tracker.save_to_file()
-        status_label.config(text=f"🗑️ Removed {item_name} from tracker")
+        status_label.config(text=f"🗑️ Removed {name} from tracker")
+        refresh_dropdowns()
     else:
         status_label.config(text="⚠️ Please enter an item name to remove")
 
-remove_item_var = tk.StringVar()
-tk.Entry(item_frame, textvariable=remove_item_var).grid(row=2, column=0, padx=5, pady=5)
-tk.Button(item_frame, text="Remove Item", command=remove_item_ui).grid(row=2, column=1, padx=5, pady=5)
+# ========== Set Target ==========
+target_frame = tk.LabelFrame(root, text="Set Target", padx=20, pady=10)
+target_frame.grid(row=1, column=1, padx=10, pady=10, sticky="w")
 
-def refresh_dropdowns():
-    items = list(tracker.stock.keys())
-    #sale_name_dropdown['values'] = items
-    target_name_dropdown['values'] = items
+target_name_var = tk.StringVar()
+target_name_dropdown = ttk.Combobox(target_frame, textvariable=target_name_var, width=20)
+target_name_dropdown.grid(row=0, column=0, padx=5, pady=5)
 
-# ========== Record Sale Section ==========
-'''sale_frame = tk.LabelFrame(root, text="Record Sale", padx=10, pady=10)
-sale_frame.grid(row=1, column=0, padx=10, pady=10)
+target_quantity_entry = tk.Entry(target_frame, width=10)
+target_quantity_entry.grid(row=0, column=1, padx=5, pady=5)
 
-tk.Label(sale_frame, text="Item Name").grid(row=0, column=0)
-sale_name_entry = tk.Entry(sale_frame)
-sale_name_entry.grid(row=0, column=1)
+def set_target():
+    name = target_name_var.get().strip()
+    qty = int(target_quantity_entry.get()) if target_quantity_entry.get().isdigit() else 0
+    if name:
+        tracker.set_target(name, qty)
+        tracker.save_to_file()
+        status_label.config(text=f"🎯 Set target of {qty} for {name}")
 
-tk.Label(sale_frame, text="Quantity Sold").grid(row=1, column=0)
-sale_quantity_entry = tk.Entry(sale_frame)
-sale_quantity_entry.grid(row=1, column=1)
+tk.Button(target_frame, text="Set Target", command=set_target).grid(row=1, column=0, columnspan=2, pady=5)
 
-sale_name_var = tk.StringVar()
-sale_name_dropdown = ttk.Combobox(sale_frame, textvariable=sale_name_var)
-sale_name_dropdown.grid(row=0, column=1)'''
+# ========== Summary Frame ==========
+summary_frame = tk.LabelFrame(root, text="Summary", padx=20, pady=10)
+summary_frame.grid(row=2, column=0, columnspan=2, padx=10, pady=10, sticky="w")
 
-# Record sale function replaced.
-'''def record_sale():
-    outlet = outlet_var.get()
-    name = sale_name_var.get()
-    quantity = int(sale_quantity_entry.get())
-    tracker.record_sale(outlet, name, quantity)
-    tracker.save_to_file()
-    status_label.config(text=f"📦 Recorded sale of {quantity} units of {name}")
-tk.Button(sale_frame, text="Record Sale", command=record_sale).grid(row=2, column=0, columnspan=2)'''
+summary_outlet_var = tk.StringVar()
+summary_outlet_dropdown = ttk.Combobox(summary_frame, textvariable=summary_outlet_var, width=30)
+summary_outlet_dropdown['values'] = ["All Outlets", "BestBuy Bukoto", "Kenjoy Bukoto", "Carrefour Acacia"]
+summary_outlet_dropdown.grid(row=0, column=1, padx=5)
+summary_outlet_var.set("All Outlets")
+
+def show_summary():
+    selected_outlet = summary_outlet_var.get()
+    summary_window = tk.Toplevel(root)
+    summary_window.title(f"Summary Report - {selected_outlet}")
+    text = tk.Text(summary_window, width=100, height=25)
+    text.pack()
+
+    headers = f"{'Item':<20}{'Weekly Sold':<15}{'Daily Est.':<15}{'Cumulative Sold':<15}{'Target':<10}{'Progress':<10}\n"
+    text.insert(tk.END, headers + "-"*80 + "\n")
+
+    if selected_outlet == "All Outlets":
+        for item in tracker.stock:
+            weekly_sold = sum(tracker.weekly_sales.get(outlet, {}).get(item, 0) for outlet in tracker.weekly_sales)
+            cumulative_sold = sum(tracker.sales.get(outlet, {}).get(item, 0) for outlet in tracker.sales)
+            daily_est = weekly_sold / 7 if weekly_sold else 0
+            target = tracker.targets.get(item, 0)
+            progress = (cumulative_sold / target * 100) if target else 0
+            line = f"{item:<20}{weekly_sold:<15}{daily_est:<15.2f}{cumulative_sold:<15}{target:<10}{progress:.2f}%\n"
+            text.insert(tk.END, line)
+    else:
+        outlet_sales = tracker.sales.get(selected_outlet, {})
+        for item in tracker.stock:
+            weekly_sold = tracker.weekly_sales.get(selected_outlet, {}).get(item, 0)
+            cumulative_sold = outlet_sales.get(item, 0)
+            daily_est = weekly_sold / 7 if weekly_sold else 0
+            target = tracker.targets.get(item, 0)
+            progress = (cumulative_sold / target * 100) if target else 0
+            line = f"{item:<20}{weekly_sold:<15}{daily_est:<15.2f}{cumulative_sold:<15}{target:<10}{progress:.2f}%\n"
+            text.insert(tk.END, line)
+
+tk.Button(summary_frame, text="Show Summary", command=show_summary).grid(row=0, column=0, sticky="w", pady=5)
+tk.Button(summary_frame, text="📁 Export Outlet Summary", command=lambda: export_outlet_summary()).grid(row=1, column=0, sticky="w", pady=5)
+tk.Button(summary_frame, text="📊 Export Monthly Roll-Up", command=lambda: export_monthly_rollup()).grid(row=2, column=0, sticky="w", pady=5)
+tk.Button(summary_frame, text="📊 Weekly Balance Entry", command=lambda: open_weekly_balance_entry()).grid(row=3, column=0, sticky="w", pady=5)
+
+def export_outlet_summary():
+    tracker.export_to_csv()
+    status_label.config(text="📁 Exported outlet summary to CSV")
+
+def export_monthly_rollup():
+    tracker.export_monthly_summary()
+    status_label.config(text="📊 Exported monthly roll-up to CSV")
 
 def open_weekly_balance_entry():
-    outlet = outlet_var.get()  # selected outlet from dropdown
+    outlet = outlet_var.get()
     entry_window = tk.Toplevel(root)
     entry_window.title(f"Weekly Balance Entry - {outlet}")
-
     entries = {}
     row = 0
     for item in tracker.stock:
@@ -112,130 +151,13 @@ def open_weekly_balance_entry():
 
     tk.Button(entry_window, text="Submit", command=submit_balances).grid(row=row, column=0, columnspan=2, pady=10)
 
-tk.Button(sale_frame, text="📊 Weekly Balance Entry", command=open_weekly_balance_entry).grid(row=4, column=0, columnspan=2, pady=5)
-
-# ========== Summary Section ==========
-summary_frame = tk.LabelFrame(root, text="Summary", padx=10, pady=10)
-summary_frame.grid(row=3, column=0, padx=10, pady=10)
-
-# Outlet selection for summary
-summary_outlet_var = tk.StringVar()
-summary_outlet_dropdown = ttk.Combobox(summary_frame, textvariable=summary_outlet_var)
-summary_outlet_dropdown['values'] = ["All Outlets", "BestBuy Bukoto", "Kenjoy Bukoto", "Carrefour Acacia"]
-summary_outlet_dropdown.grid(row=0, column=1, padx=5)
-summary_outlet_var.set("All Outlets")
-
-# Export options
-tk.Button(summary_frame, text="📁 Export Outlet Summary", command=tracker.export_to_csv).grid(row=3, column=0, sticky="w", pady=5)
-tk.Button(summary_frame, text="📊 Export Monthly Roll-Up", command=tracker.export_monthly_summary).grid(row=4, column=0, sticky="w", pady=5)
-
-def show_summary():
-    selected_outlet = summary_outlet_var.get()
-    summary_window = tk.Toplevel(root)
-    summary_window.title(f"Summary Report - {selected_outlet}")
-    text = tk.Text(summary_window, width=100, height=25)
-    text.pack()
-
-    headers = f"{'Item':<20}{'Weekly Sold':<15}{'Daily Est.':<15}{'Cumulative Sold':<15}{'Target':<10}{'Progress':<10}\n"
-    text.insert(tk.END, headers + "-"*80 + "\n")
-
-    if selected_outlet == "All Outlets":
-        for item in tracker.stock:
-            # Weekly sold = sum of last week's differences across outlets
-            weekly_sold = sum(
-                tracker.sales[outlet].get(item, 0) - tracker.sales[outlet].get(item, 0) + tracker.sales[outlet].get(item, 0)
-                for outlet in tracker.sales
-            )
-            # Actually, we need to store weekly_sold separately in StockTracker for clarity
-            cumulative_sold = sum(tracker.sales[outlet].get(item, 0) for outlet in tracker.sales)
-            daily_est = weekly_sold / 7 if weekly_sold else 0
-            target = tracker.targets.get(item, 0)
-            progress = (cumulative_sold / target * 100) if target else 0
-            line = f"{item:<20}{weekly_sold:<15}{daily_est:<15.2f}{cumulative_sold:<15}{target:<10}{progress:.2f}%\n"
-            text.insert(tk.END, line)
-    else:
-        outlet_sales = tracker.sales.get(selected_outlet, {})
-        for item in tracker.stock:
-            weekly_sold = outlet_sales.get(item, 0)  # last week's difference
-            cumulative_sold = outlet_sales.get(item, 0)
-            daily_est = weekly_sold / 7 if weekly_sold else 0
-            target = tracker.targets.get(item, 0)
-            progress = (cumulative_sold / target * 100) if target else 0
-            line = f"{item:<20}{weekly_sold:<15}{daily_est:<15.2f}{cumulative_sold:<15}{target:<10}{progress:.2f}%\n"
-            text.insert(tk.END, line)
-
-tk.Button(summary_frame, text="Show Summary", command=show_summary).grid(row=0, column=0, sticky="w")
-
 # ========== Status Label ==========
 status_label = tk.Label(root, text="", fg="green")
-status_label.grid(row=4, column=0, pady=10)
+status_label.grid(row=3, column=0, columnspan=2, pady=10, sticky="w")
 
-# Wrap the calls so the status label updates when you click
-def export_outlet_summary():
-    tracker.export_to_csv()
-    status_label.config(text="📁 Exported outlet summary to CSV")
+def refresh_dropdowns():
+    items = list(tracker.stock.keys())
+    target_name_dropdown['values'] = items
 
-def export_monthly_rollup():
-    tracker.export_monthly_summary()
-    status_label.config(text="📊 Exported monthly roll-up to CSV")
-
-tk.Button(summary_frame, text="📁 Export Outlet Summary", command=export_outlet_summary).grid(row=3, column=0, sticky="w", pady=5)
-tk.Button(summary_frame, text="📊 Export Monthly Roll-Up", command=export_monthly_rollup).grid(row=4, column=0, sticky="w", pady=5)
-# ========== Set Target Section ==========
-target_frame = tk.LabelFrame(root, text="Set Target", padx=10, pady=10)
-target_frame.grid(row=2, column=0, padx=10, pady=10)
-
-tk.Label(target_frame, text="Item Name").grid(row=0, column=0)
-target_name_var = tk.StringVar()
-target_name_dropdown = ttk.Combobox(target_frame, textvariable=target_name_var)
-target_name_dropdown.grid(row=0, column=1)
-
-tk.Label(target_frame, text="Target Quantity").grid(row=1, column=0)
-target_quantity_entry = tk.Entry(target_frame)
-target_quantity_entry.grid(row=1, column=1)
-
-def set_target():
-    name = target_name_var.get()
-    quantity = int(target_quantity_entry.get())
-    tracker.set_target(name, quantity)
-    tracker.save_to_file()
-    status_label.config(text=f"🎯 Set target of {quantity} for {name}")
-
-tk.Button(target_frame, text="Set Target", command=set_target).grid(row=2, column=0, columnspan=2)
-# ========== Export ==========
-
-def export_csv():
-    tracker.export_to_csv()
-    status_label.config(text="📁 Exported data to CSV")
-
-def open_daily_entry_sheet():
-    outlet = outlet_var.get()
-    entry_window = tk.Toplevel(root)
-    entry_window.title(f"Daily Entry - {outlet}")
-
-    entries = {}
-    row = 0
-    for item in tracker.stock:
-        tk.Label(entry_window, text=item).grid(row=row, column=0)
-        qty_entry = tk.Entry(entry_window, width=10)
-        qty_entry.grid(row=row, column=1)
-        entries[item] = qty_entry
-        row += 1
-
-    def submit_sales():
-        for item, entry in entries.items():
-            val = entry.get()
-            if val.strip().isdigit():
-                tracker.record_sale(outlet, item, int(val))
-        tracker.save_to_file()
-        status_label.config(text=f"✅ Recorded daily sales for {outlet}")
-        entry_window.destroy()
-
-    tk.Button(entry_window, text="Submit", command=submit_sales).grid(row=row, column=0, columnspan=2)
-tk.Button(sale_frame, text="📋 Daily Entry Sheet", command=open_daily_entry_sheet).grid(row=3, column=0, columnspan=2)
-tk.Button(summary_frame, text="Export to CSV", command=export_csv).grid(row=2, column=0, sticky="w")
-tracker.load_from_file()
 refresh_dropdowns()
-# ========== Launch App ==========
-
 root.mainloop()
