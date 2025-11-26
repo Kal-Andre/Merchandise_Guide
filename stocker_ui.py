@@ -42,7 +42,8 @@ def add_item():
 tk.Button(item_frame, text="Add Item", command=add_item).grid(row=0, column=2, padx=5)
 
 remove_item_var = tk.StringVar()
-tk.Entry(item_frame, textvariable=remove_item_var, width=20).grid(row=1, column=0, padx=5, pady=5)
+remove_item_dropdown = ttk.Combobox(item_frame, textvariable=remove_item_var, width=20)
+remove_item_dropdown.grid(row=1, column=0, padx=5, pady=5)
 tk.Button(item_frame, text="Remove Item", command=lambda: remove_item_ui()).grid(row=1, column=1, padx=5)
 
 def remove_item_ui():
@@ -52,6 +53,7 @@ def remove_item_ui():
         tracker.save_to_file()
         status_label.config(text=f"🗑️ Removed {name} from tracker")
         refresh_dropdowns()
+        remove_item_var.set("")
     else:
         status_label.config(text="⚠️ Please enter an item name to remove")
     # Clear field
@@ -165,6 +167,7 @@ status_label.grid(row=3, column=0, columnspan=2, pady=10, sticky="w")
 def refresh_dropdowns():
     items = list(tracker.stock.keys())
     target_name_dropdown['values'] = items
+    remove_item_dropdown['values'] = items
 
 refresh_dropdowns()
 root.mainloop()
